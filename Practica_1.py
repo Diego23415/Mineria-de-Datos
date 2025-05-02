@@ -17,6 +17,7 @@ with zipfile.ZipFile("steam-games-dataset-2025.zip", "r") as zip_ref:
     zip_ref.extractall("CSV")
 
 df = pd.read_csv("CSV/steam_games.csv")
+#DataCleaning
 df['name'] = df['name'].astype(str).str.strip()
 df['review_score_desc'] = df['review_score_desc'].astype(str).str.strip().str.lower()
 columns_to_fix = ['developers', 'publishers', 'categories', 'genres', 'platforms']
@@ -26,6 +27,7 @@ df['release_date'] = pd.to_datetime(df['release_date'], errors='coerce')
 df = df.dropna(subset=['release_date'])
 df['review_score'] = df['review_score'].replace(0.0, np.nan)
 df.rename(columns={"price_initial (USD)": "price_usd"}, inplace=True)
+#Data Cleaning
 # Solo puse 10 porque mi laptop se traba con más :c
-print(df.head(10).to_csv(index=False))
+print(df.head(10))
 
