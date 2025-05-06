@@ -125,3 +125,4 @@ top_paid_games = df_valid.sort_values(by='total_positive', ascending=False).head
 print("\n🌟 Top 10 juegos de pago con más reseñas positivas (global):\n")
 for _, row in top_paid_games.iterrows():
     print(f"{row['name'][:40]:40} | Año: {int(row['release_year'])} | {int(row['total_positive']):,} reseñas")
+#aa
