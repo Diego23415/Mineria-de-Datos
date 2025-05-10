@@ -7,7 +7,7 @@ import re
 from tabulate import tabulate
 
 df = pd.read_csv("CSV/steam_games.csv")
-#Se hara una correlacion entre precio y el año se omitiran los juegos gratis o sin fecha de lanzamiento
+
 df['name'] = df['name'].astype(str).str.strip()
 df['review_score_desc'] = df['review_score_desc'].astype(str).str.strip().str.lower()
 
@@ -33,33 +33,34 @@ def clean_date(val):
 df['release_date'] = df['release_date'].apply(clean_date)
 df['release_year'] = df['release_date'].dt.year
 
+# Filtrar datos válidos
 df_clean = df[(df['price_usd'].notna()) & (df['release_year'].notna())]
 df_clean = df_clean[(df_clean['price_usd'] < 100) & (df_clean['release_year'] >= 2000)]
+df_clean = df_clean[df_clean['release_date'].notna()]
+df_clean = df_clean[~((df_clean['is_free'] == True) & (df_clean['price_usd'] == 0))]
 
-df_clean = df_clean[df_clean['release_date'].notna()]  
-df_clean = df_clean[~((df_clean['is_free'] == True) & (df_clean['price_usd'] == 0))] 
+# Agrupar por año y calcular promedio
+df_grouped = df_clean.groupby('release_year')['price_usd'].mean().reset_index()
 
-X = df_clean[['release_year']]
-y = df_clean['price_usd']
+X = sm.add_constant(df_grouped['release_year'])
+y = df_grouped['price_usd']
 
-X = sm.add_constant(X)
 model = sm.OLS(y, X).fit()
+y_pred = model.predict(X)
 
 print(model.summary())
-
-y_pred = model.predict(X)
 
 price_mean = y.mean()
 
 plt.figure(figsize=(10, 6))
-plt.scatter(df_clean['release_year'], y, alpha=0.3, label="Datos Reales")
-plt.plot(df_clean['release_year'], y_pred, color='red', label="Línea de Regresión")
-plt.axhline(price_mean, color='green', linestyle='--', label=f"Media del Precio (USD): {price_mean:.2f}")
+plt.plot(df_grouped['release_year'], y, 'o', label="Precio promedio por año", alpha=0.7)
+plt.plot(df_grouped['release_year'], y_pred, color='red', label="Línea de Regresión")
+plt.axhline(price_mean, color='green', linestyle='--', label=f"Media Global: {price_mean:.2f} USD")
 plt.xlabel("Año de lanzamiento")
-plt.ylabel("Precio (USD)")
-plt.title("Regresión Lineal: Año de Lanzamiento vs Precio")
-plt.legend()
+plt.ylabel("Precio promedio (USD)")
+plt.title("Precio promedio por año vs Año de lanzamiento")
 plt.grid(True)
+plt.legend()
 plt.show()
 
 r2 = model.rsquared
