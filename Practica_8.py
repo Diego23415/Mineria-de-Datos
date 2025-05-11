@@ -56,7 +56,7 @@ future_years['predicted_price'] = summary_frame['mean']
 future_years['ci_lower'] = summary_frame['mean_ci_lower']
 future_years['ci_upper'] = summary_frame['mean_ci_upper']
 
-print("\n📊 Predicción de precios promedio (USD) por año:\n")
+print("\nPredicción de precios promedio (USD) por año:\n")
 print(tabulate(future_years, headers='keys', tablefmt='pretty', showindex=False))
 
 plt.figure(figsize=(10, 6))
